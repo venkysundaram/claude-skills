@@ -1,0 +1,111 @@
+{
+  "test_cases": [
+    {
+      "id": "tc_001",
+      "name": "Portfolio performance today",
+      "prompt": "Show me my portfolio performance today",
+      "expected_output": {
+        "contains": ["Holdings", "Gainers", "Losers", "1 Day", "Symbol", "Qty", "Price", "% Change", "Position Value"],
+        "format": "markdown_table_per_account",
+        "time_range": "1day",
+        "asset_class": "both",
+        "scope": "portfolio_only"
+      }
+    },
+    {
+      "id": "tc_002",
+      "name": "Weekly portfolio movement",
+      "prompt": "How have my Robinhood holdings performed this week?",
+      "expected_output": {
+        "contains": ["Holdings", "1 Week"],
+        "format": "markdown_table_per_account",
+        "time_range": "1week",
+        "asset_class": "both",
+        "scope": "portfolio_only"
+      }
+    },
+    {
+      "id": "tc_003",
+      "name": "Monthly portfolio movers",
+      "prompt": "Show me my top gainers and losers from the past month",
+      "expected_output": {
+        "contains": ["Holdings", "Gainers", "Losers", "1 Month", "Qty"],
+        "format": "markdown_table_per_account",
+        "time_range": "1month",
+        "asset_class": "both",
+        "scope": "portfolio_only"
+      }
+    },
+    {
+      "id": "tc_004",
+      "name": "Multi-account portfolio",
+      "prompt": "Break down my portfolio by account",
+      "expected_output": {
+        "contains": ["Account:", "Holdings", "Gainers", "Losers", "Position Value"],
+        "format": "markdown_table_per_account",
+        "time_range": "1day",
+        "asset_class": "both",
+        "scope": "portfolio_only",
+        "multiple_accounts": true
+      }
+    },
+    {
+      "id": "tc_005",
+      "name": "Worst performers in portfolio",
+      "prompt": "What's down the most in my portfolio?",
+      "expected_output": {
+        "contains": ["Holdings", "Losers"],
+        "format": "markdown_table_per_account",
+        "time_range": "1day",
+        "asset_class": "both",
+        "scope": "portfolio_only"
+      }
+    },
+    {
+      "id": "tc_006",
+      "name": "Crypto holdings performance",
+      "prompt": "How are my crypto holdings performing today?",
+      "expected_output": {
+        "contains": ["Holdings", "Gainers", "Losers", "crypto", "1 Day"],
+        "format": "markdown_table_per_account",
+        "time_range": "1day",
+        "asset_class": "crypto",
+        "scope": "portfolio_only"
+      }
+    }
+  ],
+  "eval_metrics": [
+    {
+      "metric": "Correct portfolio fetching",
+      "description": "Skill fetches all accounts and holdings correctly via get_accounts and get_positions"
+    },
+    {
+      "metric": "Correct time range extraction",
+      "description": "Skill correctly interprets '1 day', 'this week', 'past month', etc."
+    },
+    {
+      "metric": "Correct asset class filtering",
+      "description": "Skill correctly filters for stocks, crypto, or both as requested"
+    },
+    {
+      "metric": "Multi-account separation",
+      "description": "If user has multiple accounts, separate tables are shown for each account"
+    },
+    {
+      "metric": "Accurate sorting",
+      "description": "Gainers are sorted descending by % change; losers sorted ascending, within each account"
+    },
+    {
+      "metric": "Position value calculation",
+      "description": "Position value = current price × quantity held, calculated correctly"
+    },
+    {
+      "metric": "Clear formatting",
+      "description": "Output is presented as readable Markdown tables with proper labeling per account"
+    },
+    {
+      "metric": "Data accuracy",
+      "description": "Price, % change, dollar change, and position values are accurate and consistent with holdings"
+    }
+  ]
+}
