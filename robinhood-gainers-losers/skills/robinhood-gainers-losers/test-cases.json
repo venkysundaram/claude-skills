@@ -1,0 +1,158 @@
+{
+  "test_cases": [
+    {
+      "id": "tc_001",
+      "name": "Portfolio performance today",
+      "prompt": "Show me my portfolio performance today",
+      "expected_output": {
+        "contains": ["My Robinhood Portfolio (1 Day)", "Gainers", "Losers", "Symbol", "Qty", "Price", "% Change", "Position Value"],
+        "format": "markdown_table_per_account",
+        "time_range": "1day",
+        "asset_class": "both",
+        "scope": "portfolio_only"
+      }
+    },
+    {
+      "id": "tc_002",
+      "name": "Weekly portfolio movement",
+      "prompt": "How have my Robinhood holdings performed this week?",
+      "expected_output": {
+        "contains": ["My Robinhood Portfolio (1 Week)", "Gainers", "Losers"],
+        "format": "markdown_table_per_account",
+        "time_range": "1week",
+        "asset_class": "both",
+        "scope": "portfolio_only",
+        "expected_tools": ["get_equity_historicals"]
+      }
+    },
+    {
+      "id": "tc_003",
+      "name": "Monthly portfolio movers",
+      "prompt": "Show me my top gainers and losers from the past month",
+      "expected_output": {
+        "contains": ["My Robinhood Portfolio (1 Month)", "Gainers", "Losers", "Qty"],
+        "format": "markdown_table_per_account",
+        "time_range": "1month",
+        "asset_class": "both",
+        "scope": "portfolio_only"
+      }
+    },
+    {
+      "id": "tc_004",
+      "name": "Multi-account portfolio",
+      "prompt": "Break down my portfolio by account",
+      "expected_output": {
+        "contains": ["Account:", "Gainers", "Losers", "Position Value", "Total value"],
+        "not_contains_full_account_numbers": true,
+        "format": "markdown_table_per_account",
+        "time_range": "1day",
+        "asset_class": "both",
+        "scope": "portfolio_only",
+        "multiple_accounts": true
+      }
+    },
+    {
+      "id": "tc_005",
+      "name": "Worst performers in portfolio",
+      "prompt": "What's down the most in my portfolio?",
+      "expected_output": {
+        "contains": ["Losers"],
+        "format": "markdown_table_per_account",
+        "time_range": "1day",
+        "asset_class": "both",
+        "scope": "portfolio_only"
+      }
+    },
+    {
+      "id": "tc_006",
+      "name": "Crypto holdings performance today",
+      "prompt": "How are my crypto holdings performing today?",
+      "expected_output": {
+        "contains": ["Asset class:** Crypto", "1 Day"],
+        "format": "markdown_table_per_account",
+        "time_range": "1day",
+        "asset_class": "crypto",
+        "scope": "portfolio_only",
+        "expected_tools": ["get_crypto_positions", "get_crypto_quotes"],
+        "forbidden_tools": ["get_equity_historicals"]
+      }
+    },
+    {
+      "id": "tc_007",
+      "name": "Crypto weekly is reported as unavailable, not invented",
+      "prompt": "How did my crypto do this week?",
+      "expected_output": {
+        "contains": ["no crypto price history for this range"],
+        "format": "markdown_table_per_account",
+        "time_range": "1week",
+        "asset_class": "crypto",
+        "scope": "portfolio_only"
+      }
+    },
+    {
+      "id": "tc_008",
+      "name": "Single named account",
+      "prompt": "How is my Roth IRA doing today?",
+      "expected_output": {
+        "contains": ["My Holdings — Gainers", "My Holdings — Losers"],
+        "format": "markdown_table_single_account",
+        "time_range": "1day",
+        "asset_class": "both",
+        "scope": "named_account_only"
+      }
+    },
+    {
+      "id": "tc_009",
+      "name": "Top N limit",
+      "prompt": "Show me my top 5 gainers and losers today",
+      "expected_output": {
+        "max_rows_per_table": 5,
+        "time_range": "1day",
+        "limit": 5,
+        "scope": "portfolio_only"
+      }
+    }
+  ],
+  "global_expectations": {
+    "forbidden_tools": [
+      "place_equity_order", "place_option_order", "place_crypto_order",
+      "cancel_equity_order", "cancel_option_order", "cancel_crypto_order",
+      "exercise_option", "create_alert"
+    ],
+    "uses_script": "scripts/compute_gainers_losers.py"
+  },
+  "eval_metrics": [
+    {
+      "metric": "Correct portfolio fetching",
+      "description": "Calls get_accounts, then get_equity_positions with account_number and get_crypto_positions with rhs_account_number (never rhc_account_number), following pagination cursors"
+    },
+    {
+      "metric": "Respects tool limits",
+      "description": "get_equity_quotes is called with at most 20 symbols and get_equity_historicals with at most 10 symbols per call"
+    },
+    {
+      "metric": "Correct time range extraction",
+      "description": "Interprets 'today', 'this week', 'past month' as 1day, 1week, 1month"
+    },
+    {
+      "metric": "Correct asset class filtering",
+      "description": "Filters for stocks, crypto, or both as requested"
+    },
+    {
+      "metric": "Multi-account separation",
+      "description": "Separate tables per account when there are several; a single 'My Holdings' set when there is one"
+    },
+    {
+      "metric": "Script-computed numbers",
+      "description": "Percentages, dollar changes, position values and sorting come from compute_gainers_losers.py, not mental math"
+    },
+    {
+      "metric": "Honest about gaps",
+      "description": "Holdings without prices or references (including crypto week/month) are listed as not included with a reason, never estimated"
+    },
+    {
+      "metric": "Read-only",
+      "description": "No orders, cancellations, exercises or alerts are created while running the skill"
+    }
+  ]
+}
